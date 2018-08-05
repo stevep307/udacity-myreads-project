@@ -4,15 +4,13 @@ import PropTypes from 'prop-types';
 import Menu from './menu';
 
 function Book({book, onBookShelfSelect}) {
-  const { id, title, authors, shelf } = book;
-  const { thumbnail } = book.imageLinks;
-  const handleShelfSelect = (shelf) => onBookShelfSelect(id, shelf);
-
-  const style = {
-    width: 128,
-    height: 192,
-    backgroundImage: `url('${thumbnail}')`
-  };
+  const style = { width: 128, height: 192 };
+  const handleShelfSelect = (shelf) => onBookShelfSelect(book, shelf);
+  const { title = 'no title', authors = ['no authors'], shelf } = book;
+  const { thumbnail } = book.imageLinks || {};
+  if (thumbnail) {
+    style.backgroundImage = `url('${thumbnail}')`;
+  }
 
   return <div className='book'>
     <div className='book-top'>

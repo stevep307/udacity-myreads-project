@@ -19,7 +19,7 @@ Menu.propTypes = {
 };
 
 Menu.defaultProps = {
-  selectedShelf: 'move'
+  selectedShelf: 'none'
 };
 
 export default Menu;

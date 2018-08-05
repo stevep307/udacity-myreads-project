@@ -13,6 +13,7 @@ class BooksApp extends React.Component {
      * users can use the browser's back and forward buttons to navigate between
      * pages, as well as provide a good URL they can bookmark and share.
      */
+    bookHashMap: {},
     shelvesList: {
       'currentlyReading': { bookList: [], shelfTitle: 'Currently Reading' },
       'wantToRead': { bookList: [], shelfTitle: 'Want to Read' },
@@ -22,28 +23,49 @@ class BooksApp extends React.Component {
   };
 
   componentDidMount() {
-    const {shelvesList} = this.state;
-    BooksAPI.getAll().then((books) => {
-      for (const book of books) {
-        shelvesList[book.shelf].bookList.push(book)
-      }
-      this.setState({ shelvesList })
-    });
+    const {shelvesList, bookHashMap} = this.state;
+    BooksAPI.getAll()
+      .then((books) => {
+        for (const book of books) {
+          bookHashMap[book.id] = book;
+          shelvesList[book.shelf].bookList.push(book.id);
+        }
+        this.setState({shelvesList, bookHashMap});
+      });
   }
 
   onOpenSearchPage = () => this.setState({ showSearchPage: true });
   onCloseSearchPage = () => this.setState({ showSearchPage: false });
-  onBookShelfSelect = () => {};
+
+  onBookShelfSelect = (book, selectedShelf) => {
+    BooksAPI.update(book, selectedShelf)
+      .then((res) => {
+        const {id, shelf} = book;
+        const {bookHashMap, shelvesList} = this.state;
+
+        if(!bookHashMap.hasOwnProperty(id)) {
+          bookHashMap[id] = book;
+        }
+        if(shelf) {
+          shelvesList[shelf].bookList = res[shelf];
+        }
+        if (selectedShelf && selectedShelf !== 'none'){
+          shelvesList[selectedShelf].bookList = res[selectedShelf];
+        }
+        bookHashMap[id].shelf = selectedShelf === 'none' ? 'none' : selectedShelf;
+        this.setState({shelvesList, bookHashMap});
+      });
+  };
 
   render() {
-    const {shelvesList, showSearchPage} = this.state;
+    const {bookHashMap, shelvesList, showSearchPage} = this.state;
 
     return (
       <div className="app">
         {showSearchPage ? (
-          <SearchPage onBookShelfSelect={this.onBookShelfSelect} onCloseSearchPage={this.onCloseSearchPage} />
+          <SearchPage bookHashMap={bookHashMap} onBookShelfSelect={this.onBookShelfSelect} onCloseSearchPage={this.onCloseSearchPage} />
         ) : (
-          <ShelvesPage shelvesList={shelvesList} onBookShelfSelect={this.onBookShelfSelect} onOpenSearchPage={this.onOpenSearchPage} />
+          <ShelvesPage bookHashMap={bookHashMap} shelvesList={shelvesList} onBookShelfSelect={this.onBookShelfSelect} onOpenSearchPage={this.onOpenSearchPage} />
         )}
       </div>
     )

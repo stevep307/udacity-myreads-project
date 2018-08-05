@@ -9,10 +9,19 @@ class SearchPage extends Component {
     bookList: []
   };
 
-  handleSearch = (event, e) => {
-    BooksAPI.search(event.target.value).then((books) => {
-      this.setState({ bookList: books })
-    });
+  handleSearch = (event) => {
+    const {bookHashMap} = this.props;
+    BooksAPI.search(event.target.value)
+      .then((books) => {
+        const booksWithSelves = books.map(function (book) {
+          if (bookHashMap.hasOwnProperty(book.id)) {
+            return bookHashMap[book.id];
+          }
+          return book;
+        });
+        this.setState({bookList: booksWithSelves});
+      })
+      .catch(() => this.setState({bookList: []}));
   };
 
   render() {
@@ -33,6 +42,7 @@ class SearchPage extends Component {
 }
 
 SearchPage.propTypes = {
+  bookHashMap: PropTypes.object.isRequired,
   onBookShelfSelect: PropTypes.func.isRequired,
   onCloseSearchPage: PropTypes.func.isRequired
 };

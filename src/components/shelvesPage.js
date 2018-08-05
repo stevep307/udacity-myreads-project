@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 
 import Shelf from './shelf';
 
-function ShelvesPage({shelvesList, onBookShelfSelect, onOpenSearchPage}) {
+function ShelvesPage({bookHashMap, shelvesList, onBookShelfSelect, onOpenSearchPage}) {
   return <div className='list-books'>
     <div className='list-books-title'>
       <h1>MyReads</h1>
@@ -11,7 +11,7 @@ function ShelvesPage({shelvesList, onBookShelfSelect, onOpenSearchPage}) {
     <div className='list-books-content'>
       <div>
         {
-          Object.values(shelvesList).map((shelf) => <Shelf shelf={shelf} onBookShelfSelect={onBookShelfSelect} key={shelf.shelfTitle} />)
+          Object.values(shelvesList).map((shelf) => <Shelf shelf={shelf} bookHashMap={bookHashMap} onBookShelfSelect={onBookShelfSelect} key={shelf.shelfTitle} />)
         }
       </div>
     </div>
@@ -22,6 +22,7 @@ function ShelvesPage({shelvesList, onBookShelfSelect, onOpenSearchPage}) {
 }
 
 ShelvesPage.propTypes = {
+  bookHashMap: PropTypes.object.isRequired,
   shelvesList: PropTypes.object.isRequired,
   onBookShelfSelect: PropTypes.func.isRequired,
   onOpenSearchPage: PropTypes.func.isRequired
