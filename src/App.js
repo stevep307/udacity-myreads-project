@@ -4,22 +4,18 @@ import './App.css'
 import * as BooksAPI from './BooksAPI'
 import ShelvesPage from './components/shelvesPage';
 import SearchPage from './components/searchPage';
+import { Route } from 'react-router-dom'
 
 class BooksApp extends React.Component {
   state = {
-    /**
-     * TODO: Instead of using this state variable to keep track of which page
-     * we're on, use the URL in the browser's address bar. This will ensure that
-     * users can use the browser's back and forward buttons to navigate between
-     * pages, as well as provide a good URL they can bookmark and share.
-     */
+    searchString: '',
     bookHashMap: {},
+    searchBookList: [],
     shelvesList: {
       'currentlyReading': { bookList: [], shelfTitle: 'Currently Reading' },
       'wantToRead': { bookList: [], shelfTitle: 'Want to Read' },
       'read': { bookList: [], shelfTitle: 'Read' }
-    },
-    showSearchPage: false
+    }
   };
 
   componentDidMount() {
@@ -33,9 +29,6 @@ class BooksApp extends React.Component {
         this.setState({shelvesList, bookHashMap});
       });
   }
-
-  onOpenSearchPage = () => this.setState({ showSearchPage: true });
-  onCloseSearchPage = () => this.setState({ showSearchPage: false });
 
   onBookShelfSelect = (book, selectedShelf) => {
     BooksAPI.update(book, selectedShelf)
@@ -57,16 +50,35 @@ class BooksApp extends React.Component {
       });
   };
 
+  onSearch = (searchString) => {
+    const {bookHashMap} = this.state;
+    this.setState({searchString});
+    BooksAPI.search(searchString)
+      .then((books) => {
+        const booksWithSelves = books.map(function (book) {
+          if (bookHashMap.hasOwnProperty(book.id)) {
+            return bookHashMap[book.id];
+          }
+          return book;
+        });
+        this.setState({searchBookList: booksWithSelves});
+      })
+    .catch(() => this.setState({searchBookList: []}));
+  };
+
+  onCloseSearch = () => this.setState({searchString: '', searchBookList: []});
+
   render() {
-    const {bookHashMap, shelvesList, showSearchPage} = this.state;
+    const {searchString, bookHashMap, shelvesList, searchBookList} = this.state;
 
     return (
-      <div className="app">
-        {showSearchPage ? (
-          <SearchPage bookHashMap={bookHashMap} onBookShelfSelect={this.onBookShelfSelect} onCloseSearchPage={this.onCloseSearchPage} />
-        ) : (
-          <ShelvesPage bookHashMap={bookHashMap} shelvesList={shelvesList} onBookShelfSelect={this.onBookShelfSelect} onOpenSearchPage={this.onOpenSearchPage} />
-        )}
+      <div className='app'>
+        <Route path='/search' component={() =>
+          <SearchPage searchString={searchString} bookList={searchBookList} onBookShelfSelect={this.onBookShelfSelect} onSearch={this.onSearch} onCloseSearch={this.onCloseSearch}/>
+        }/>
+        <Route path='/' exact component={() =>
+          <ShelvesPage bookHashMap={bookHashMap} shelvesList={shelvesList} onBookShelfSelect={this.onBookShelfSelect} />
+        }/>
       </div>
     )
   }
