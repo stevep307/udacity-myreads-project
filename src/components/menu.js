@@ -1,9 +1,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-function Menu({onShelfSelect}) {
+function Menu({selectedShelf, onShelfSelect}) {
   return <div className='book-shelf-changer'>
-    <select onChange={(event) => onShelfSelect(event.target.value)}>
+    <select value={selectedShelf} onChange={(event) => onShelfSelect(event.target.value)}>
       <option value='move' disabled>Move to...</option>
       <option value='currentlyReading'>Currently Reading</option>
       <option value='wantToRead'>Want to Read</option>
@@ -14,7 +14,12 @@ function Menu({onShelfSelect}) {
 }
 
 Menu.propTypes = {
-  onShelfSelect: PropTypes.func
+  selectedShelf: PropTypes.string,
+  onShelfSelect: PropTypes.func.isRequired
+};
+
+Menu.defaultProps = {
+  selectedShelf: 'move'
 };
 
 export default Menu;
